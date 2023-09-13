@@ -64,3 +64,63 @@ func GetDomainCertMsg(domain string) (cm tls.ConnectionState, err error) {
 	cm = tlsConn.ConnectionState()
 	return
 }
+func search(question string) (string, error) {
+	url := "https://aichat.adriantech.uk/api/openapi/v1/chat/completions"
+	headers := map[string]string{
+		"Authorization": "Bearer fastgpt-apd5320l00ojv21yp8h49fok-64e6b185f1124b2fc0829976",
+		"User-Agent":    "Apifox/1.0.0 (https://www.apifox.cn)",
+		"Content-Type":  "application/json",
+	}
+
+	data := requestData{
+		ChatID: "88888888",
+		Stream: false,
+		Detail: false,
+		Messages: []userInput{
+			{
+				Content: question,
+				Role:    "user",
+			},
+		},
+	}
+
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		return "", err
+	}
+
+	// Custom TLS configuration (not recommended for production)
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	client := &http.Client{Transport: tr}
+	resp, err := client.Post(url, "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusOK {
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return "", err
+		}
+
+		var result map[string]interface{}
+		json.Unmarshal(body, &result)
+
+		content := ""
+		if choices, ok := result["choices"].([]interface{}); ok && len(choices) > 0 {
+			if firstChoice, ok := choices[0].(map[string]interface{}); ok {
+				if message, ok := firstChoice["message"].(map[string]interface{}); ok {
+					content = message["content"].(string)
+				}
+			}
+		}
+
+		return content, nil
+	}
+
+	return "", fmt.Errorf("Received %d HTTP status code", resp.StatusCode)
+}
