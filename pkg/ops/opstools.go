@@ -64,7 +64,7 @@ func GetDomainCertMsg(domain string) (cm tls.ConnectionState, err error) {
 	cm = tlsConn.ConnectionState()
 	return
 }
-func search(question string) (string, error) {
+func Search(question string) (string, error) {
 	url := "https://aichat.adriantech.uk/api/openapi/v1/chat/completions"
 	headers := map[string]string{
 		"Authorization": "Bearer fastgpt-apd5320l00ojv21yp8h49fok-64e6b185f1124b2fc0829976",
