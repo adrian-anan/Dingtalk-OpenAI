@@ -113,7 +113,7 @@ func LawMsg(rmsg *dingbot.ReceiveMsg) error {
 	//cert := dm.PeerCertificates[0]
 	// 回复@我的用户
 	
-	reply := fmt.Sprintf("你好")
+	reply := Process.Search("你好")
 	aObj := db.Chat{
 		Username:      rmsg.SenderNick,
 		Source:        rmsg.GetChatTitle(),
