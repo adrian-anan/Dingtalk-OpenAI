@@ -272,6 +272,13 @@ func DoRequest(msgObj dingbot.ReceiveMsg, c *gin.Context) {
 				return
 			}
 			return
+		case strings.HasPrefix(msgObj.Text.Content, "#法律"):
+			err := process.LawMsg(&msgObj)
+			if err != nil {
+				logger.Warning(fmt.Errorf("process request: %v", err))
+				return
+			}
+			return
 		default:
 			var err error
 			msgObj.Text.Content, err = process.GeneratePrompt(msgObj.Text.Content)
