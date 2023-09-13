@@ -93,3 +93,42 @@ func DomainCertMsg(rmsg *dingbot.ReceiveMsg) error {
 	}
 	return nil
 }
+func LawMsg(rmsg *dingbot.ReceiveMsg) error {
+	qObj := db.Chat{
+		Username:      rmsg.SenderNick,
+		Source:        rmsg.GetChatTitle(),
+		ChatType:      db.Q,
+		ParentContent: 0,
+		Content:       rmsg.Text.Content,
+	}
+	qid, err := qObj.Add()
+	if err != nil {
+		logger.Error("往MySQL新增数据失败,错误信息：", err)
+	}
+	//domain := strings.TrimSpace(strings.Split(rmsg.Text.Content, " ")[1])
+	//dm, err := ops.GetDomainCertMsg(domain)
+	if err != nil {
+		return err
+	}
+	//cert := dm.PeerCertificates[0]
+	// 回复@我的用户
+	reply := fmt.Sprintf("你好")
+	aObj := db.Chat{
+		Username:      rmsg.SenderNick,
+		Source:        rmsg.GetChatTitle(),
+		ChatType:      db.A,
+		ParentContent: qid,
+		Content:       reply,
+	}
+	_, err = aObj.Add()
+	if err != nil {
+		logger.Error("往MySQL新增数据失败,错误信息：", err)
+	}
+	logger.Info(fmt.Sprintf("🤖 %s得到的答案: %#v", rmsg.SenderNick, reply))
+	_, err = rmsg.ReplyToDingtalk(string(dingbot.MARKDOWN), reply)
+	if err != nil {
+		logger.Error(fmt.Errorf("send message error: %v", err))
+		return err
+	}
+	return nil
+}
